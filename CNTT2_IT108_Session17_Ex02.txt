@@ -1,0 +1,28 @@
+# Bài 2: Xử lý sự cố Cache và phiên đăng nhập trong doanh nghiệp
+
+## Phần 1: Phân tích
+
+**1. Vì sao CSS không cập nhật (nút "Thanh toán" vẫn xanh)?**
+
+- Trình duyệt dùng **Browser Cache** để lưu bản sao các file tĩnh (HTML, CSS, JS, ảnh) trên RAM/Disk, nhằm giảm số request lên server và tải trang nhanh hơn.
+- Khi An sửa file CSS trên server, trình duyệt vẫn thấy file cũ trong cache nên dùng luôn bản cũ (Cache Hit) mà không tải bản mới. Vì vậy nút vẫn màu xanh.
+- F5 thường vẫn có thể dùng lại cache, nên chưa đủ để lấy file mới.
+
+**2. Vì sao đóng trình duyệt là bị đăng xuất?**
+
+- Cookie định danh của An **không có `Max-Age` hay `Expires`**, nên nó là **Session Cookie**. Loại này chỉ nằm trong bộ nhớ tạm và bị xóa khi đóng trình duyệt, nên mở lại phải đăng nhập lại.
+- Còn **Persistent Cookie** thì có `Max-Age` hoặc `Expires`, được lưu xuống ổ đĩa và còn tồn tại đến khi hết hạn, kể cả khi đã đóng trình duyệt.
+
+| | Session Cookie | Persistent Cookie |
+|---|---|---|
+| Có Max-Age/Expires | Không | Có |
+| Lưu ở | Bộ nhớ tạm | Ổ đĩa |
+| Khi đóng trình duyệt | Bị xóa | Vẫn còn đến khi hết hạn |
+
+## Phần 2: Sửa lỗi
+
+**Hành động 1 (cập nhật giao diện ngay):** nhấn **Ctrl + Shift + R** (Hard Reload) để bỏ qua cache và tải lại CSS mới từ server. Hoặc mở F12 → tab Network → tick **Disable cache** trong lúc đang code. Cách này không cần xóa toàn bộ lịch sử web. Về lâu dài có thể thêm version vào tên file (ví dụ `style.css?v=2`) để trình duyệt tự tải bản mới.
+
+**Hành động 2 (giữ đăng nhập lâu dài):** thêm thuộc tính `Max-Age` (hoặc `Expires`) cho cookie đăng nhập để biến nó thành Persistent Cookie, ví dụ `Max-Age=2592000` (30 ngày). Nên thêm `HttpOnly; Secure` để an toàn hơn.
+
+**Kết luận:** CSS không đổi là do Browser Cache, còn bị đăng xuất là do Session Cookie. Hai lỗi này độc lập nhau và đều xử lý được mà không cần xóa lịch sử người dùng.
